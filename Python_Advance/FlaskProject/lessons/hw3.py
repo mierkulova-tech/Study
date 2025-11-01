@@ -1,0 +1,38 @@
+from sqlalchemy import create_engine, Column, Integer, String, Numeric, Boolean, ForeignKey
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+# Задача 1: Создайте экземпляр движка для подключения к SQLite базе данных в памяти.
+engine = create_engine("sqlite:///:memory:")  # :memory: = база только в оперативной памяти
+
+# Создайте сессию для взаимодействия с базой данных, используя созданный движок.
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# Базовый класс для моделей
+Base = declarative_base()
+
+
+# Задача 4: Определите связанную модель категории Category (определяем ДО Product, потому что Product ссылается на неё)
+class Category(Base):
+    __tablename__ = 'categories'
+
+    id = Column(Integer, primary_key=True)              # числовой идентификатор
+    name = Column(String(100), nullable=False)          # строка (макс. 100 символов)
+    description = Column(String(255))                   # строка (макс. 255 символов)
+
+
+# Задача 3 и 5: Определите модель продукта Product + связь через category_id
+class Product(Base):
+    __tablename__ = 'products'
+
+    id = Column(Integer, primary_key=True)              # числовой идентификатор
+    name = Column(String(100), nullable=False)          # строка (макс. 100 символов)
+    price = Column(Numeric(precision=10, scale=2))      # числовое значение с фиксированной точностью
+    in_stock = Column(Boolean, default=True)            # логическое значение
+
+    # Задача 5: Установите связь между таблицами Product и Category с помощью колонки category_id.
+    category_id = Column(Integer, ForeignKey('categories.id'))
+
+
+# Создаём таблицы в базе (в памяти)
+Base.metadata.create_all(engine)
